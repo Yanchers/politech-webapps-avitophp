@@ -891,3 +891,25 @@ body {
     display: flex;
     gap: 12px;
 }
+
+/* Кнопка избранного */
+.btn--favorite {
+    background: #fff;
+    color: #e74c3c;
+    border: 2px solid #e74c3c;
+}
+
+.btn--favorite:hover {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.btn--favorite--active {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.btn--favorite--active:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+}

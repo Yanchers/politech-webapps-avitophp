@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Database;
 use App\Core\Response;
 use App\Core\Validator;
 use App\Repositories\AdvertisementRepository;
@@ -40,11 +41,22 @@ class AdController extends Controller
         $images = $this->adRepo->getImages($id);
         $seller = $this->userRepo->findById($ad->seller_id);
 
+        $isFavorite = false;
+        if ($this->session->isAuthenticated()) {
+            $db = Database::getInstance();
+            $fav = $db->fetch(
+                "SELECT * FROM favorite_advertisements WHERE user_id = ? AND ad_id = ?",
+                [$this->session->getUserId(), $id]
+            );
+            $isFavorite = $fav !== null;
+        }
+
         $this->render('ad/show', [
             'title' => $ad->title,
             'ad' => $ad,
             'images' => $images,
             'seller' => $seller,
+            'isFavorite' => $isFavorite,
         ]);
     }
 

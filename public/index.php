@@ -59,4 +59,9 @@ $router->get('/profile', 'ProfileController@index', ['auth']);
 $router->get('/profile/edit', 'ProfileController@edit', ['auth']);
 $router->post('/profile/edit', 'ProfileController@update', ['auth']);
 
+// --- Избранное ---
+$router->get('/favorites', 'FavoriteController@index', ['auth']);
+$router->post('/favorites/add/{adId}', 'FavoriteController@add', ['auth']);
+$router->post('/favorites/remove/{adId}', 'FavoriteController@remove', ['auth']);
+
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

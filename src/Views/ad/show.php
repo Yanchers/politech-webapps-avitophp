@@ -44,11 +44,23 @@
         <?php endif; ?>
 
         <div class="ad-detail__actions">
-            <?php if (isset($user) && $user && $user['user_id'] === $ad->seller_id): ?>
-                <a href="/ad/<?= $ad->ad_id ?>/edit" class="btn">Редактировать</a>
-                <form action="/ad/<?= $ad->ad_id ?>/delete" method="POST" style="display:inline" onsubmit="return confirm('Удалить объявление?')">
-                    <button type="submit" class="btn btn--danger">Удалить</button>
-                </form>
+            <?php if (isset($user) && $user): ?>
+                <?php if ($user['user_id'] === $ad->seller_id): ?>
+                    <a href="/ad/<?= $ad->ad_id ?>/edit" class="btn">Редактировать</a>
+                    <form action="/ad/<?= $ad->ad_id ?>/delete" method="POST" style="display:inline" onsubmit="return confirm('Удалить объявление?')">
+                        <button type="submit" class="btn btn--danger">Удалить</button>
+                    </form>
+                <?php else: ?>
+                    <?php if ($isFavorite): ?>
+                        <form action="/favorites/remove/<?= $ad->ad_id ?>" method="POST" style="display:inline">
+                            <button type="submit" class="btn btn--favorite btn--favorite--active">В избранном</button>
+                        </form>
+                    <?php else: ?>
+                        <form action="/favorites/add/<?= $ad->ad_id ?>" method="POST" style="display:inline">
+                            <button type="submit" class="btn btn--favorite">В избранное</button>
+                        </form>
+                    <?php endif; ?>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>
