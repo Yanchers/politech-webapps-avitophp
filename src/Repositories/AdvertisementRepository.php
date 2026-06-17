@@ -70,12 +70,12 @@ class AdvertisementRepository
             $params[] = $itemConditionId;
         }
 
-        if ($priceMin !== null) {
+        if ($priceMin !== null && $priceMin != 0) {
             $sql .= " AND a.price >= ?";
             $params[] = $priceMin;
         }
 
-        if ($priceMax !== null) {
+        if ($priceMax !== null && $priceMax != 0) {
             $sql .= " AND a.price <= ?";
             $params[] = $priceMax;
         }
@@ -142,12 +142,12 @@ class AdvertisementRepository
             $params[] = $itemConditionId;
         }
 
-        if ($priceMin !== null) {
+        if ($priceMin !== null && $priceMin != 0) {
             $sql .= " AND a.price >= ?";
             $params[] = $priceMin;
         }
 
-        if ($priceMax !== null) {
+        if ($priceMax !== null && $priceMax != 0) {
             $sql .= " AND a.price <= ?";
             $params[] = $priceMax;
         }

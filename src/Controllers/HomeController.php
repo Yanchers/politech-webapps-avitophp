@@ -10,7 +10,7 @@ class HomeController extends Controller
 {
     private AdvertisementRepository $adRepo;
     private CategoryRepository $categoryRepo;
-
+    
     public function __construct()
     {
         parent::__construct();
@@ -20,7 +20,7 @@ class HomeController extends Controller
 
     public function index(): void
     {
-        $activeAds = $this->adRepo->findAllActive(null, null, null, 20, 0);
+        $activeAds = $this->adRepo->findAllActive(limit: 8, offset: 0);
         $categories = $this->categoryRepo->findParents();
 
         $this->render('home', [

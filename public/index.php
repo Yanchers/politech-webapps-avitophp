@@ -15,6 +15,14 @@ use App\Middleware\GuestMiddleware;
 $appConfig = require __DIR__ . '/../config/app.php';
 $dbConfig = require __DIR__ . '/../config/database.php';
 
+function console_log($data) {
+    // Safely encode arrays or objects to JSON strings
+    $js_code = 'console.log(' . json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ');';
+    
+    // Wrap inside standard script tags and output to browser
+    echo '<script>' . $js_code . '</script>';
+}
+
 Database::init($dbConfig);
 
 Session::getInstance();
