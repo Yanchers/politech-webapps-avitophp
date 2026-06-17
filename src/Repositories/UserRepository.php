@@ -37,6 +37,11 @@ class UserRepository
         return $this->findById($id);
     }
 
+    public function update(int $id, array $data): void
+    {
+        $this->db->update('users', $data, 'user_id = ?', [$id]);
+    }
+
     public function delete(int $id): void
     {
         $this->db->delete('users', 'user_id = ?', [$id]);

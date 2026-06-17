@@ -54,4 +54,9 @@ $router->post('/ad/{id}/edit', 'AdController@update', ['auth']);
 $router->post('/ad/{id}/delete', 'AdController@destroy', ['auth']);
 $router->get('/profile/ads', 'AdController@userAds', ['auth']);
 
+// --- Профиль ---
+$router->get('/profile', 'ProfileController@index', ['auth']);
+$router->get('/profile/edit', 'ProfileController@edit', ['auth']);
+$router->post('/profile/edit', 'ProfileController@update', ['auth']);
+
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
