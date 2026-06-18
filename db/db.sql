@@ -108,17 +108,26 @@ CREATE TABLE IF NOT EXISTS user_basket(
     FOREIGN KEY (ad_id) REFERENCES advertisements(ad_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
--- история заказов
+-- заказы (заголовок заказа)
 CREATE TABLE IF NOT EXISTS orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
     order_number VARCHAR(50) NOT NULL UNIQUE,
     buyer_id INT NOT NULL,
-    ad_id INT NOT NULL,
-    price_paid DECIMAL(10, 2) NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT NULL,
     
-    FOREIGN KEY (buyer_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (buyer_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- позиции заказа (купленные товары)
+CREATE TABLE IF NOT EXISTS order_items (
+    order_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    ad_id INT NOT NULL,
+    price_paid DECIMAL(10, 2) NOT NULL,
+    
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
     FOREIGN KEY (ad_id) REFERENCES advertisements(ad_id)
 );
 
