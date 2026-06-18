@@ -1,0 +1,38 @@
+<h1>Категории</h1>
+
+<div class="admin-toolbar">
+    <a href="/admin/categories/create" class="btn">+ Создать</a>
+</div>
+
+<?php if (empty($items)): ?>
+    <p>Нет категорий.</p>
+<?php else: ?>
+    <form action="/admin/categories/batch-delete" method="POST" class="admin-batch-form">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" class="admin-check-all"></th>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Родитель</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($items as $item): ?>
+                    <tr>
+                        <td><input type="checkbox" name="ids[]" value="<?= $item->category_id ?>" class="admin-check-item"></td>
+                        <td><?= $item->category_id ?></td>
+                        <td><?= $this->escape($item->name) ?></td>
+                        <td><?= $item->parent_id ? 'ID: ' . $item->parent_id : '—' ?></td>
+                        <td class="admin-actions">
+                            <a href="/admin/categories/<?= $item->category_id ?>/edit" class="btn btn--small">Ред.</a>
+                            <a href="/admin/categories/<?= $item->category_id ?>/delete" class="btn btn--small btn--danger" onclick="return confirm('Удалить?')">Удалить</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn--danger btn--small" onclick="return confirm('Удалить выбранные?')">Удалить выбранные</button>
+    </form>
+<?php endif; ?>

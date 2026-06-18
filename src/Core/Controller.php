@@ -43,4 +43,9 @@ abstract class Controller
     {
         $this->view->render($template, array_merge($this->getLayoutData(), $data));
     }
+
+    protected function renderAdmin(string $template, array $data = []): void
+    {
+        $this->view->renderAdmin($template, array_merge($this->getLayoutData(), $data));
+    }
 }

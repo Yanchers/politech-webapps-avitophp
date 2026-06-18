@@ -29,6 +29,24 @@ class View
         require $this->viewsPath . '/layouts/footer.php';
     }
 
+    public function renderAdmin(string $template, array $data = []): void
+    {
+        extract($data);
+
+        $layoutContent = function () use ($template, $data) {
+            extract($data);
+            $path = $this->viewsPath . '/' . $template . '.php';
+            if (!file_exists($path)) {
+                throw new \RuntimeException("View not found: {$template}");
+            }
+            require $path;
+        };
+
+        require $this->viewsPath . '/layouts/admin_header.php';
+        $layoutContent();
+        require $this->viewsPath . '/layouts/footer.php';
+    }
+
     public function renderPartial(string $template, array $data = []): void
     {
         extract($data);

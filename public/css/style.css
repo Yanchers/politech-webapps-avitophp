@@ -976,3 +976,109 @@ body {
     gap: 8px;
     flex-shrink: 0;
 }
+
+/* ─── Админ-панель ──────────────────────────────────── */
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.admin-stat-card {
+    display: block;
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    text-decoration: none;
+    color: #333;
+    text-align: center;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.admin-stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.admin-stat-card__number {
+    font-size: 36px;
+    font-weight: 700;
+    color: #00aaff;
+    margin-bottom: 4px;
+}
+
+.admin-stat-card__label {
+    font-size: 14px;
+    color: #888;
+}
+
+.admin-toolbar {
+    margin-bottom: 16px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 12px;
+}
+
+.admin-table th {
+    background: #f8f8f8;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #888;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: 10px 12px;
+    font-size: 14px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.admin-table tr:hover td {
+    background: #fafafa;
+}
+
+.admin-table th:first-child,
+.admin-table td:first-child {
+    width: 40px;
+    text-align: center;
+}
+
+.admin-actions {
+    white-space: nowrap;
+}
+
+.admin-actions .btn {
+    margin-right: 4px;
+}
+
+.admin-batch-form {
+    margin-bottom: 24px;
+}
+
+.admin-cell-preview {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #888;
+    font-size: 13px;
+}
+
+/* select all checkbox */
+.admin-check-all,
+.admin-check-item {
+    cursor: pointer;
+}

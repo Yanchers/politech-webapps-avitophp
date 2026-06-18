@@ -81,4 +81,54 @@ $router->get('/moderation', 'ModerationController@index', ['auth', 'role:employe
 $router->post('/moderation/{id}/approve', 'ModerationController@approve', ['auth', 'role:employee,admin']);
 $router->post('/moderation/{id}/reject', 'ModerationController@reject', ['auth', 'role:employee,admin']);
 
+// --- Админ-панель ---
+$router->get('/admin', 'AdminController@dashboard', ['auth', 'role:admin']);
+$router->get('/admin/cities', 'AdminController@citiesIndex', ['auth', 'role:admin']);
+$router->get('/admin/cities/create', 'AdminController@citiesCreate', ['auth', 'role:admin']);
+$router->post('/admin/cities/store', 'AdminController@citiesStore', ['auth', 'role:admin']);
+$router->get('/admin/cities/{id}/edit', 'AdminController@citiesEdit', ['auth', 'role:admin']);
+$router->post('/admin/cities/{id}/update', 'AdminController@citiesUpdate', ['auth', 'role:admin']);
+$router->get('/admin/cities/{id}/delete', 'AdminController@citiesDelete', ['auth', 'role:admin']);
+$router->post('/admin/cities/batch-delete', 'AdminController@citiesBatchDelete', ['auth', 'role:admin']);
+
+$router->get('/admin/categories', 'AdminController@categoriesIndex', ['auth', 'role:admin']);
+$router->get('/admin/categories/create', 'AdminController@categoriesCreate', ['auth', 'role:admin']);
+$router->post('/admin/categories/store', 'AdminController@categoriesStore', ['auth', 'role:admin']);
+$router->get('/admin/categories/{id}/edit', 'AdminController@categoriesEdit', ['auth', 'role:admin']);
+$router->post('/admin/categories/{id}/update', 'AdminController@categoriesUpdate', ['auth', 'role:admin']);
+$router->get('/admin/categories/{id}/delete', 'AdminController@categoriesDelete', ['auth', 'role:admin']);
+$router->post('/admin/categories/batch-delete', 'AdminController@categoriesBatchDelete', ['auth', 'role:admin']);
+
+$router->get('/admin/item_conditions', 'AdminController@itemConditionsIndex', ['auth', 'role:admin']);
+$router->get('/admin/item_conditions/create', 'AdminController@itemConditionsCreate', ['auth', 'role:admin']);
+$router->post('/admin/item_conditions/store', 'AdminController@itemConditionsStore', ['auth', 'role:admin']);
+$router->get('/admin/item_conditions/{id}/edit', 'AdminController@itemConditionsEdit', ['auth', 'role:admin']);
+$router->post('/admin/item_conditions/{id}/update', 'AdminController@itemConditionsUpdate', ['auth', 'role:admin']);
+$router->get('/admin/item_conditions/{id}/delete', 'AdminController@itemConditionsDelete', ['auth', 'role:admin']);
+$router->post('/admin/item_conditions/batch-delete', 'AdminController@itemConditionsBatchDelete', ['auth', 'role:admin']);
+
+$router->get('/admin/users', 'AdminController@usersIndex', ['auth', 'role:admin']);
+$router->get('/admin/users/create', 'AdminController@usersCreate', ['auth', 'role:admin']);
+$router->post('/admin/users/store', 'AdminController@usersStore', ['auth', 'role:admin']);
+$router->get('/admin/users/{id}/edit', 'AdminController@usersEdit', ['auth', 'role:admin']);
+$router->post('/admin/users/{id}/update', 'AdminController@usersUpdate', ['auth', 'role:admin']);
+$router->get('/admin/users/{id}/delete', 'AdminController@usersDelete', ['auth', 'role:admin']);
+$router->post('/admin/users/batch-delete', 'AdminController@usersBatchDelete', ['auth', 'role:admin']);
+
+$router->get('/admin/advertisements', 'AdminController@advertisementsIndex', ['auth', 'role:admin']);
+$router->get('/admin/advertisements/create', 'AdminController@advertisementsCreate', ['auth', 'role:admin']);
+$router->post('/admin/advertisements/store', 'AdminController@advertisementsStore', ['auth', 'role:admin']);
+$router->get('/admin/advertisements/{id}/edit', 'AdminController@advertisementsEdit', ['auth', 'role:admin']);
+$router->post('/admin/advertisements/{id}/update', 'AdminController@advertisementsUpdate', ['auth', 'role:admin']);
+$router->get('/admin/advertisements/{id}/delete', 'AdminController@advertisementsDelete', ['auth', 'role:admin']);
+$router->post('/admin/advertisements/batch-delete', 'AdminController@advertisementsBatchDelete', ['auth', 'role:admin']);
+
+$router->get('/admin/ad_chat_messages', 'AdminController@adChatMessagesIndex', ['auth', 'role:admin']);
+$router->get('/admin/ad_chat_messages/create', 'AdminController@adChatMessagesCreate', ['auth', 'role:admin']);
+$router->post('/admin/ad_chat_messages/store', 'AdminController@adChatMessagesStore', ['auth', 'role:admin']);
+$router->get('/admin/ad_chat_messages/{id}/edit', 'AdminController@adChatMessagesEdit', ['auth', 'role:admin']);
+$router->post('/admin/ad_chat_messages/{id}/update', 'AdminController@adChatMessagesUpdate', ['auth', 'role:admin']);
+$router->get('/admin/ad_chat_messages/{id}/delete', 'AdminController@adChatMessagesDelete', ['auth', 'role:admin']);
+$router->post('/admin/ad_chat_messages/batch-delete', 'AdminController@adChatMessagesBatchDelete', ['auth', 'role:admin']);
+
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
