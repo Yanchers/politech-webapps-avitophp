@@ -76,4 +76,9 @@ $router->get('/order/success', 'OrderController@success', ['auth']);
 $router->get('/orders', 'OrderController@index', ['auth']);
 $router->get('/order/{orderNumber}', 'OrderController@show', ['auth']);
 
+// --- Модерация ---
+$router->get('/moderation', 'ModerationController@index', ['auth', 'role:employee,admin']);
+$router->post('/moderation/{id}/approve', 'ModerationController@approve', ['auth', 'role:employee,admin']);
+$router->post('/moderation/{id}/reject', 'ModerationController@reject', ['auth', 'role:employee,admin']);
+
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
