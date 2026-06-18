@@ -51,7 +51,7 @@ INSERT IGNORE INTO categories (category_id, name, parent_id) VALUES
 
 -- Админ (пароль: admin123)
 INSERT IGNORE INTO users (user_id, email, phone, password_hash, first_name, last_name, role_id, city_id) VALUES
-(1, 'admin@avito.local', '+70000000001', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Админ', 'Админов', 3, 1);
+(1, 'admin@avito.local', '+70000000001', '$2y$12$e8ibmY.uHRm1RiFGz65B0eUFx/nXCRgT5hWt2g0T9aZZvEFL6u/bO', 'Админ', 'Админов', 3, 1);
 
 -- Тестовые пользователи (пароль: test123)
 INSERT IGNORE INTO users (user_id, email, phone, password_hash, first_name, last_name, role_id, city_id) VALUES
