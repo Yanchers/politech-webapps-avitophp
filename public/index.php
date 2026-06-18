@@ -64,4 +64,16 @@ $router->get('/favorites', 'FavoriteController@index', ['auth']);
 $router->post('/favorites/add/{adId}', 'FavoriteController@add', ['auth']);
 $router->post('/favorites/remove/{adId}', 'FavoriteController@remove', ['auth']);
 
+// --- Корзина ---
+$router->get('/cart', 'CartController@index', ['auth']);
+$router->post('/cart/add/{adId}', 'CartController@add', ['auth']);
+$router->post('/cart/remove/{adId}', 'CartController@remove', ['auth']);
+
+// --- Заказы ---
+$router->get('/order/create', 'OrderController@create', ['auth']);
+$router->post('/order/create', 'OrderController@store', ['auth']);
+$router->get('/order/success', 'OrderController@success', ['auth']);
+$router->get('/orders', 'OrderController@index', ['auth']);
+$router->get('/order/{orderNumber}', 'OrderController@show', ['auth']);
+
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

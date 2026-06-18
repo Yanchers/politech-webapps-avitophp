@@ -60,6 +60,9 @@
                             <button type="submit" class="btn btn--favorite">В избранное</button>
                         </form>
                     <?php endif; ?>
+                    <form action="/cart/add/<?= $ad->ad_id ?>" method="POST" style="display:inline">
+                        <button type="submit" class="btn">В корзину</button>
+                    </form>
                 <?php endif; ?>
             <?php endif; ?>
         </div>
