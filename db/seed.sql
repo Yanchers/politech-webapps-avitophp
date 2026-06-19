@@ -55,10 +55,10 @@ INSERT IGNORE INTO users (user_id, email, phone, password_hash, first_name, last
 
 -- Тестовые пользователи (пароль: test123)
 INSERT IGNORE INTO users (user_id, email, phone, password_hash, first_name, last_name, role_id, city_id) VALUES
-(2, 'ivan@test.local', '+70000000002', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Иван', 'Петров', 1, 1),
-(3, 'elena@test.local', '+70000000003', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Елена', 'Смирнова', 1, 2),
-(4, 'maksim@test.local', '+70000000004', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Максим', 'Орлов', 1, 3),
-(5, 'olga@test.local', '+70000000005', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Ольга', 'Козлова', 1, 5);
+(2, 'ivan@test.local', '+70000000002', '$2y$12$Rxpf8NbAAVHnkBgV2BF8LebwCQZ7xG43T5sVt.hGHWgAfQ/yZO1P.', 'Иван', 'Петров', 1, 1),
+(3, 'elena@test.local', '+70000000003', '$2y$12$Rxpf8NbAAVHnkBgV2BF8LebwCQZ7xG43T5sVt.hGHWgAfQ/yZO1P.', 'Елена', 'Смирнова', 1, 2),
+(4, 'maksim@test.local', '+70000000004', '$2y$12$Rxpf8NbAAVHnkBgV2BF8LebwCQZ7xG43T5sVt.hGHWgAfQ/yZO1P.', 'Максим', 'Орлов', 1, 3),
+(5, 'olga@test.local', '+70000000005', '$2y$12$Rxpf8NbAAVHnkBgV2BF8LebwCQZ7xG43T5sVt.hGHWgAfQ/yZO1P.', 'Ольга', 'Козлова', 1, 5);
 
 -- Тестовые объявления
 INSERT IGNORE INTO advertisements (ad_id, seller_id, category_id, item_condition_id, city_id, title, description, price, status_id, created_at, updated_at) VALUES
