@@ -29,6 +29,35 @@ class CityRepository
         return array_map(fn($row) => $this->hydrate($row), $this->db->fetchAll($sql));
     }
 
+    public function create(string $name): City
+    {
+        $id = $this->db->insert('cities', ['name' => $name]);
+        return $this->findById($id);
+    }
+
+    public function update(int $id, string $name): void
+    {
+        $this->db->update('cities', ['name' => $name], 'city_id = ?', [$id]);
+    }
+
+    public function delete(int $id): void
+    {
+        $this->db->delete('cities', 'city_id = ?', [$id]);
+    }
+
+    public function batchDelete(array $ids): void
+    {
+        if (empty($ids)) return;
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $this->db->delete('cities', "city_id IN ({$placeholders})", $ids);
+    }
+
+    public function count(): int
+    {
+        $result = $this->db->fetch("SELECT COUNT(*) AS cnt FROM cities");
+        return (int) ($result['cnt'] ?? 0);
+    }
+
     private function hydrate(array $row): City
     {
         $city = new City();

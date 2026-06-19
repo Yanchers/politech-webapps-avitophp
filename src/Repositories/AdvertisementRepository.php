@@ -130,6 +130,38 @@ class AdvertisementRepository
         return array_map(fn($row) => $this->hydrate($row), $this->db->fetchAll($sql, [$sellerId]));
     }
 
+    public function findAllWithSellers(): array
+    {
+        return $this->db->fetchAll(
+            "SELECT a.*, c.name AS category_name, ct.name AS city_name,
+                    ic.name AS condition_name, s.name AS status_name,
+                    u.email AS seller_email, u.first_name AS seller_first_name, u.last_name AS seller_last_name
+             FROM advertisements a
+             JOIN categories c ON a.category_id = c.category_id
+             JOIN cities ct ON a.city_id = ct.city_id
+             JOIN item_conditions ic ON a.item_condition_id = ic.item_condition_id
+             JOIN advertisement_statuses s ON a.status_id = s.ad_status_id
+             JOIN users u ON a.seller_id = u.user_id
+             ORDER BY a.created_at DESC"
+        );
+    }
+
+    public function findAllSimple(): array
+    {
+        return $this->db->fetchAll("SELECT ad_id, title FROM advertisements ORDER BY ad_id DESC");
+    }
+
+    public function getAllStatuses(): array
+    {
+        return $this->db->fetchAll("SELECT * FROM advertisement_statuses ORDER BY ad_status_id ASC");
+    }
+
+    public function count(): int
+    {
+        $result = $this->db->fetch("SELECT COUNT(*) AS cnt FROM advertisements");
+        return (int) ($result['cnt'] ?? 0);
+    }
+
     public function countActive(
         ?int $categoryId = null,
         ?int $cityId = null,
@@ -196,6 +228,13 @@ class AdvertisementRepository
     public function delete(int $id): void
     {
         $this->db->delete('advertisements', 'ad_id = ?', [$id]);
+    }
+
+    public function batchDelete(array $ids): void
+    {
+        if (empty($ids)) return;
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $this->db->delete('advertisements', "ad_id IN ({$placeholders})", $ids);
     }
 
     public function getImages(int $adId): array

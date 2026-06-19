@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Core\Database;
 use App\Core\Response;
 use App\Repositories\AdvertisementRepository;
 use App\Repositories\CategoryRepository;
@@ -15,25 +14,17 @@ use App\Repositories\ChatMessageRepository;
 
 class AdminController extends Controller
 {
-    private Database $db;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->db = Database::getInstance();
-    }
-
     // ─── Dashboard ────────────────────────────────────────
 
     public function dashboard(): void
     {
         $stats = [
-            'users' => $this->db->fetch("SELECT COUNT(*) AS cnt FROM users")['cnt'],
-            'ads' => $this->db->fetch("SELECT COUNT(*) AS cnt FROM advertisements")['cnt'],
-            'cities' => $this->db->fetch("SELECT COUNT(*) AS cnt FROM cities")['cnt'],
-            'categories' => $this->db->fetch("SELECT COUNT(*) AS cnt FROM categories")['cnt'],
-            'conditions' => $this->db->fetch("SELECT COUNT(*) AS cnt FROM item_conditions")['cnt'],
-            'messages' => $this->db->fetch("SELECT COUNT(*) AS cnt FROM ad_chat_messages")['cnt'],
+            'users' => (new UserRepository())->count(),
+            'ads' => (new AdvertisementRepository())->count(),
+            'cities' => (new CityRepository())->count(),
+            'categories' => (new CategoryRepository())->count(),
+            'conditions' => (new ItemConditionRepository())->count(),
+            'messages' => (new ChatMessageRepository())->count(),
         ];
 
         $this->renderAdmin('admin/dashboard', [
@@ -68,7 +59,7 @@ class AdminController extends Controller
             $this->redirect('/admin/cities/create');
             return;
         }
-        $this->db->insert('cities', ['name' => $name]);
+        (new CityRepository())->create($name);
         $this->session->setFlash('success', 'Город создан');
         $this->redirect('/admin/cities');
     }
@@ -100,14 +91,14 @@ class AdminController extends Controller
             $this->redirect("/admin/cities/{$id}/edit");
             return;
         }
-        $this->db->update('cities', ['name' => $name], 'city_id = ?', [$id]);
+        (new CityRepository())->update($id, $name);
         $this->session->setFlash('success', 'Город обновлён');
         $this->redirect('/admin/cities');
     }
 
     public function citiesDelete(int $id): void
     {
-        $this->db->delete('cities', 'city_id = ?', [$id]);
+        (new CityRepository())->delete($id);
         $this->session->setFlash('success', 'Город удалён');
         $this->redirect('/admin/cities');
     }
@@ -116,8 +107,7 @@ class AdminController extends Controller
     {
         $ids = $this->request->post('ids');
         if (is_array($ids) && count($ids)) {
-            $placeholders = implode(',', array_fill(0, count($ids), '?'));
-            $this->db->delete('cities', "city_id IN ({$placeholders})", $ids);
+            (new CityRepository())->batchDelete($ids);
         }
         $this->session->setFlash('success', 'Города удалены');
         $this->redirect('/admin/cities');
@@ -159,7 +149,7 @@ class AdminController extends Controller
             $data['parent_id'] = (int) $parentId;
         }
 
-        $this->db->insert('categories', $data);
+        (new CategoryRepository())->create($data);
         $this->session->setFlash('success', 'Категория создана');
         $this->redirect('/admin/categories');
     }
@@ -203,14 +193,14 @@ class AdminController extends Controller
             $data['parent_id'] = null;
         }
 
-        $this->db->update('categories', $data, 'category_id = ?', [$id]);
+        (new CategoryRepository())->update($id, $data);
         $this->session->setFlash('success', 'Категория обновлена');
         $this->redirect('/admin/categories');
     }
 
     public function categoriesDelete(int $id): void
     {
-        $this->db->delete('categories', 'category_id = ?', [$id]);
+        (new CategoryRepository())->delete($id);
         $this->session->setFlash('success', 'Категория удалена');
         $this->redirect('/admin/categories');
     }
@@ -219,8 +209,7 @@ class AdminController extends Controller
     {
         $ids = $this->request->post('ids');
         if (is_array($ids) && count($ids)) {
-            $placeholders = implode(',', array_fill(0, count($ids), '?'));
-            $this->db->delete('categories', "category_id IN ({$placeholders})", $ids);
+            (new CategoryRepository())->batchDelete($ids);
         }
         $this->session->setFlash('success', 'Категории удалены');
         $this->redirect('/admin/categories');
@@ -252,7 +241,7 @@ class AdminController extends Controller
             $this->redirect('/admin/item_conditions/create');
             return;
         }
-        $this->db->insert('item_conditions', ['name' => $name]);
+        (new ItemConditionRepository())->create($name);
         $this->session->setFlash('success', 'Состояние создано');
         $this->redirect('/admin/item_conditions');
     }
@@ -284,14 +273,14 @@ class AdminController extends Controller
             $this->redirect("/admin/item_conditions/{$id}/edit");
             return;
         }
-        $this->db->update('item_conditions', ['name' => $name], 'item_condition_id = ?', [$id]);
+        (new ItemConditionRepository())->update($id, $name);
         $this->session->setFlash('success', 'Состояние обновлено');
         $this->redirect('/admin/item_conditions');
     }
 
     public function itemConditionsDelete(int $id): void
     {
-        $this->db->delete('item_conditions', 'item_condition_id = ?', [$id]);
+        (new ItemConditionRepository())->delete($id);
         $this->session->setFlash('success', 'Состояние удалено');
         $this->redirect('/admin/item_conditions');
     }
@@ -300,8 +289,7 @@ class AdminController extends Controller
     {
         $ids = $this->request->post('ids');
         if (is_array($ids) && count($ids)) {
-            $placeholders = implode(',', array_fill(0, count($ids), '?'));
-            $this->db->delete('item_conditions', "item_condition_id IN ({$placeholders})", $ids);
+            (new ItemConditionRepository())->batchDelete($ids);
         }
         $this->session->setFlash('success', 'Состояния удалены');
         $this->redirect('/admin/item_conditions');
@@ -311,13 +299,7 @@ class AdminController extends Controller
 
     public function usersIndex(): void
     {
-        $rows = $this->db->fetchAll(
-            "SELECT u.*, r.name AS role_name, c.name AS city_name
-             FROM users u
-             JOIN roles r ON u.role_id = r.role_id
-             JOIN cities c ON u.city_id = c.city_id
-             ORDER BY u.user_id ASC"
-        );
+        $rows = (new UserRepository())->findAllWithRolesAndCities();
         $this->renderAdmin('admin/users/index', [
             'title' => 'Пользователи',
             'items' => $rows,
@@ -345,14 +327,15 @@ class AdminController extends Controller
             return;
         }
 
-        $existing = $this->db->fetch("SELECT user_id FROM users WHERE email = ?", [trim($data['email'])]);
+        $userRepo = new UserRepository();
+        $existing = $userRepo->findByEmail(trim($data['email']));
         if ($existing) {
             $this->session->setFlash('error', 'Пользователь с таким email уже существует');
             $this->redirect('/admin/users/create');
             return;
         }
 
-        $this->db->insert('users', [
+        $userRepo->create([
             'email' => trim($data['email']),
             'phone' => trim($data['phone'] ?? ''),
             'password_hash' => password_hash($data['password'], PASSWORD_DEFAULT),
@@ -413,14 +396,14 @@ class AdminController extends Controller
             $updateData['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
         }
 
-        $this->db->update('users', $updateData, 'user_id = ?', [$id]);
+        (new UserRepository())->update($id, $updateData);
         $this->session->setFlash('success', 'Пользователь обновлён');
         $this->redirect('/admin/users');
     }
 
     public function usersDelete(int $id): void
     {
-        $this->db->delete('users', 'user_id = ?', [$id]);
+        (new UserRepository())->delete($id);
         $this->session->setFlash('success', 'Пользователь удалён');
         $this->redirect('/admin/users');
     }
@@ -429,8 +412,7 @@ class AdminController extends Controller
     {
         $ids = $this->request->post('ids');
         if (is_array($ids) && count($ids)) {
-            $placeholders = implode(',', array_fill(0, count($ids), '?'));
-            $this->db->delete('users', "user_id IN ({$placeholders})", $ids);
+            (new UserRepository())->batchDelete($ids);
         }
         $this->session->setFlash('success', 'Пользователи удалены');
         $this->redirect('/admin/users');
@@ -440,18 +422,7 @@ class AdminController extends Controller
 
     public function advertisementsIndex(): void
     {
-        $rows = $this->db->fetchAll(
-            "SELECT a.*, c.name AS category_name, ct.name AS city_name,
-                    ic.name AS condition_name, s.name AS status_name,
-                    u.email AS seller_email, u.first_name AS seller_first_name, u.last_name AS seller_last_name
-             FROM advertisements a
-             JOIN categories c ON a.category_id = c.category_id
-             JOIN cities ct ON a.city_id = ct.city_id
-             JOIN item_conditions ic ON a.item_condition_id = ic.item_condition_id
-             JOIN advertisement_statuses s ON a.status_id = s.ad_status_id
-             JOIN users u ON a.seller_id = u.user_id
-             ORDER BY a.created_at DESC"
-        );
+        $rows = (new AdvertisementRepository())->findAllWithSellers();
         $this->renderAdmin('admin/advertisements/index', [
             'title' => 'Объявления',
             'items' => $rows,
@@ -463,9 +434,8 @@ class AdminController extends Controller
         $categories = $this->getCategoryTree();
         $cities = (new CityRepository())->findAll('name');
         $conditions = (new ItemConditionRepository())->findAll();
-        $users = $this->db->fetchAll("SELECT user_id, email, first_name, last_name FROM users ORDER BY user_id ASC");
-
-        $statuses = $this->db->fetchAll("SELECT * FROM advertisement_statuses ORDER BY ad_status_id ASC");
+        $users = (new UserRepository())->findAllSimple();
+        $statuses = (new AdvertisementRepository())->getAllStatuses();
 
         $this->renderAdmin('admin/advertisements/create', [
             'title' => 'Создать объявление',
@@ -496,7 +466,8 @@ class AdminController extends Controller
             return;
         }
 
-        $adId = $this->db->insert('advertisements', [
+        $adRepo = new AdvertisementRepository();
+        $ad = $adRepo->create([
             'seller_id' => (int) ($data['seller_id'] ?? 0),
             'category_id' => (int) ($data['category_id'] ?? 0),
             'item_condition_id' => (int) ($data['item_condition_id'] ?? 0),
@@ -508,7 +479,7 @@ class AdminController extends Controller
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
-        $this->handleAdImageUpload($adId);
+        $this->handleAdImageUpload($ad->ad_id);
 
         $this->session->setFlash('success', 'Объявление создано');
         $this->redirect('/admin/advertisements');
@@ -516,7 +487,8 @@ class AdminController extends Controller
 
     public function advertisementsEdit(int $id): void
     {
-        $ad = (new AdvertisementRepository())->findById($id);
+        $adRepo = new AdvertisementRepository();
+        $ad = $adRepo->findById($id);
         if (!$ad) {
             Response::notFound();
             return;
@@ -525,9 +497,9 @@ class AdminController extends Controller
         $categories = $this->getCategoryTree();
         $cities = (new CityRepository())->findAll('name');
         $conditions = (new ItemConditionRepository())->findAll();
-        $users = $this->db->fetchAll("SELECT user_id, email, first_name, last_name FROM users ORDER BY user_id ASC");
-        $statuses = $this->db->fetchAll("SELECT * FROM advertisement_statuses ORDER BY ad_status_id ASC");
-        $images = (new AdvertisementRepository())->getImages($id);
+        $users = (new UserRepository())->findAllSimple();
+        $statuses = $adRepo->getAllStatuses();
+        $images = $adRepo->getImages($id);
 
         $this->renderAdmin('admin/advertisements/edit', [
             'title' => 'Редактировать объявление',
@@ -543,7 +515,8 @@ class AdminController extends Controller
 
     public function advertisementsUpdate(int $id): void
     {
-        $ad = (new AdvertisementRepository())->findById($id);
+        $adRepo = new AdvertisementRepository();
+        $ad = $adRepo->findById($id);
         if (!$ad) {
             Response::notFound();
             return;
@@ -560,7 +533,7 @@ class AdminController extends Controller
             'status_id'
         ]);
 
-        $this->db->update('advertisements', [
+        $adRepo->update($id, [
             'seller_id' => (int) ($data['seller_id'] ?? 0),
             'category_id' => (int) ($data['category_id'] ?? 0),
             'item_condition_id' => (int) ($data['item_condition_id'] ?? 0),
@@ -570,12 +543,12 @@ class AdminController extends Controller
             'price' => (float) ($data['price'] ?? 0),
             'status_id' => (int) ($data['status_id'] ?? 2),
             'updated_at' => date('Y-m-d H:i:s'),
-        ], 'ad_id = ?', [$id]);
+        ]);
 
         $deleteImages = $this->request->post('delete_images');
         if (is_array($deleteImages)) {
             foreach ($deleteImages as $imageId) {
-                (new AdvertisementRepository())->deleteImage((int) $imageId);
+                $adRepo->deleteImage((int) $imageId);
             }
         }
 
@@ -587,11 +560,12 @@ class AdminController extends Controller
 
     public function advertisementsDelete(int $id): void
     {
-        $images = (new AdvertisementRepository())->getImages($id);
+        $adRepo = new AdvertisementRepository();
+        $images = $adRepo->getImages($id);
         foreach ($images as $img) {
-            (new AdvertisementRepository())->deleteImage($img->image_id);
+            $adRepo->deleteImage($img->image_id);
         }
-        $this->db->delete('advertisements', 'ad_id = ?', [$id]);
+        $adRepo->delete($id);
         $this->session->setFlash('success', 'Объявление удалено');
         $this->redirect('/admin/advertisements');
     }
@@ -600,14 +574,14 @@ class AdminController extends Controller
     {
         $ids = $this->request->post('ids');
         if (is_array($ids) && count($ids)) {
+            $adRepo = new AdvertisementRepository();
             foreach ($ids as $adId) {
-                $images = (new AdvertisementRepository())->getImages((int) $adId);
+                $images = $adRepo->getImages((int) $adId);
                 foreach ($images as $img) {
-                    (new AdvertisementRepository())->deleteImage($img->image_id);
+                    $adRepo->deleteImage($img->image_id);
                 }
             }
-            $placeholders = implode(',', array_fill(0, count($ids), '?'));
-            $this->db->delete('advertisements', "ad_id IN ({$placeholders})", $ids);
+            $adRepo->batchDelete($ids);
         }
         $this->session->setFlash('success', 'Объявления удалены');
         $this->redirect('/admin/advertisements');
@@ -617,17 +591,7 @@ class AdminController extends Controller
 
     public function adChatMessagesIndex(): void
     {
-        $rows = $this->db->fetchAll(
-            "SELECT m.*, 
-                    s.email AS sender_email, s.first_name AS sender_first_name, s.last_name AS sender_last_name,
-                    r.email AS receiver_email, r.first_name AS receiver_first_name, r.last_name AS receiver_last_name,
-                    a.title AS ad_title
-             FROM ad_chat_messages m
-             JOIN users s ON m.sender_id = s.user_id
-             JOIN users r ON m.receiver_id = r.user_id
-             JOIN advertisements a ON m.ad_id = a.ad_id
-             ORDER BY m.ad_chat_message_id ASC"
-        );
+        $rows = (new ChatMessageRepository())->findAllWithDetails();
         $this->renderAdmin('admin/ad_chat_messages/index', [
             'title' => 'Сообщения чата',
             'items' => $rows,
@@ -636,8 +600,8 @@ class AdminController extends Controller
 
     public function adChatMessagesCreate(): void
     {
-        $users = $this->db->fetchAll("SELECT user_id, email, first_name, last_name FROM users ORDER BY user_id ASC");
-        $ads = $this->db->fetchAll("SELECT ad_id, title FROM advertisements ORDER BY ad_id DESC");
+        $users = (new UserRepository())->findAllSimple();
+        $ads = (new AdvertisementRepository())->findAllSimple();
         $this->renderAdmin('admin/ad_chat_messages/create', [
             'title' => 'Создать сообщение',
             'users' => $users,
@@ -653,7 +617,7 @@ class AdminController extends Controller
             $this->redirect('/admin/ad_chat_messages/create');
             return;
         }
-        $this->db->insert('ad_chat_messages', $data);
+        (new ChatMessageRepository())->create($data);
         $this->session->setFlash('success', 'Сообщение создано');
         $this->redirect('/admin/ad_chat_messages');
     }
@@ -665,8 +629,8 @@ class AdminController extends Controller
             Response::notFound();
             return;
         }
-        $users = $this->db->fetchAll("SELECT user_id, email, first_name, last_name FROM users ORDER BY user_id ASC");
-        $ads = $this->db->fetchAll("SELECT ad_id, title FROM advertisements ORDER BY ad_id DESC");
+        $users = (new UserRepository())->findAllSimple();
+        $ads = (new AdvertisementRepository())->findAllSimple();
         $this->renderAdmin('admin/ad_chat_messages/edit', [
             'title' => 'Редактировать сообщение',
             'item' => $item,
@@ -677,7 +641,8 @@ class AdminController extends Controller
 
     public function adChatMessagesUpdate(int $id): void
     {
-        $item = (new ChatMessageRepository())->findById($id);
+        $repo = new ChatMessageRepository();
+        $item = $repo->findById($id);
         if (!$item) {
             Response::notFound();
             return;
@@ -689,14 +654,14 @@ class AdminController extends Controller
             $this->redirect("/admin/ad_chat_messages/{$id}/edit");
             return;
         }
-        $this->db->update('ad_chat_messages', $data, 'ad_chat_message_id = ?', [$id]);
+        $repo->update($id, $data);
         $this->session->setFlash('success', 'Сообщение обновлено');
         $this->redirect('/admin/ad_chat_messages');
     }
 
     public function adChatMessagesDelete(int $id): void
     {
-        $this->db->delete('ad_chat_messages', 'ad_chat_message_id = ?', [$id]);
+        (new ChatMessageRepository())->delete($id);
         $this->session->setFlash('success', 'Сообщение удалено');
         $this->redirect('/admin/ad_chat_messages');
     }
@@ -705,8 +670,7 @@ class AdminController extends Controller
     {
         $ids = $this->request->post('ids');
         if (is_array($ids) && count($ids)) {
-            $placeholders = implode(',', array_fill(0, count($ids), '?'));
-            $this->db->delete('ad_chat_messages', "ad_chat_message_id IN ({$placeholders})", $ids);
+            (new ChatMessageRepository())->batchDelete($ids);
         }
         $this->session->setFlash('success', 'Сообщения удалены');
         $this->redirect('/admin/ad_chat_messages');
@@ -716,16 +680,7 @@ class AdminController extends Controller
 
     private function getCategoryTree(): array
     {
-        $repo = new CategoryRepository();
-        $parents = $repo->findParents();
-        $tree = [];
-        foreach ($parents as $parent) {
-            $tree[] = [
-                'parent' => $parent,
-                'children' => $repo->findByParentId($parent->category_id),
-            ];
-        }
-        return $tree;
+        return (new CategoryRepository())->getTree();
     }
 
     // ─── Image upload helper ──────────────────────────────
@@ -746,7 +701,8 @@ class AdminController extends Controller
             mkdir($uploadDir, 0755, true);
         }
 
-        $sortOrder = (new AdvertisementRepository())->getNextSortOrder($adId);
+        $adRepo = new AdvertisementRepository();
+        $sortOrder = $adRepo->getNextSortOrder($adId);
 
         $names = $files['name'];
         $tmpNames = $files['tmp_name'];
@@ -778,7 +734,7 @@ class AdminController extends Controller
             $destPath = $uploadDir . $newName;
 
             if (move_uploaded_file($tmpNames[$i], $destPath)) {
-                (new AdvertisementRepository())->addImage($adId, 'uploads/' . $newName, $sortOrder++);
+                $adRepo->addImage($adId, 'uploads/' . $newName, $sortOrder++);
             }
         }
     }

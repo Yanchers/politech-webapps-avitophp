@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Core\Database;
 use App\Core\Response;
 use App\Core\Validator;
 use App\Repositories\ChatMessageRepository;

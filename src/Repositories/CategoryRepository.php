@@ -47,6 +47,48 @@ class CategoryRepository
         );
     }
 
+    public function create(array $data): Category
+    {
+        $id = $this->db->insert('categories', $data);
+        return $this->findById($id);
+    }
+
+    public function update(int $id, array $data): void
+    {
+        $this->db->update('categories', $data, 'category_id = ?', [$id]);
+    }
+
+    public function delete(int $id): void
+    {
+        $this->db->delete('categories', 'category_id = ?', [$id]);
+    }
+
+    public function batchDelete(array $ids): void
+    {
+        if (empty($ids)) return;
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $this->db->delete('categories', "category_id IN ({$placeholders})", $ids);
+    }
+
+    public function getTree(): array
+    {
+        $parents = $this->findParents();
+        $tree = [];
+        foreach ($parents as $parent) {
+            $tree[] = [
+                'parent' => $parent,
+                'children' => $this->findByParentId($parent->category_id),
+            ];
+        }
+        return $tree;
+    }
+
+    public function count(): int
+    {
+        $result = $this->db->fetch("SELECT COUNT(*) AS cnt FROM categories");
+        return (int) ($result['cnt'] ?? 0);
+    }
+
     private function hydrate(array $row): Category
     {
         $category = new Category();

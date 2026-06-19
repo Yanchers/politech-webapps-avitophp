@@ -3,12 +3,12 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Core\Database;
 use App\Core\Response;
 use App\Core\Validator;
 use App\Repositories\AdvertisementRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\CityRepository;
+use App\Repositories\FavoriteAdvertisementRepository;
 use App\Repositories\ItemConditionRepository;
 use App\Repositories\UserRepository;
 
@@ -17,6 +17,7 @@ class AdController extends Controller
     private AdvertisementRepository $adRepo;
     private CategoryRepository $categoryRepo;
     private CityRepository $cityRepo;
+    private FavoriteAdvertisementRepository $favRepo;
     private ItemConditionRepository $conditionRepo;
     private UserRepository $userRepo;
 
@@ -26,6 +27,7 @@ class AdController extends Controller
         $this->adRepo = new AdvertisementRepository();
         $this->categoryRepo = new CategoryRepository();
         $this->cityRepo = new CityRepository();
+        $this->favRepo = new FavoriteAdvertisementRepository();
         $this->conditionRepo = new ItemConditionRepository();
         $this->userRepo = new UserRepository();
     }
@@ -43,12 +45,7 @@ class AdController extends Controller
 
         $isFavorite = false;
         if ($this->session->isAuthenticated()) {
-            $db = Database::getInstance();
-            $fav = $db->fetch(
-                "SELECT * FROM favorite_advertisements WHERE user_id = ? AND ad_id = ?",
-                [$this->session->getUserId(), $id]
-            );
-            $isFavorite = $fav !== null;
+            $isFavorite = $this->favRepo->exists($this->session->getUserId(), $id);
         }
 
         $this->render('ad/show', [
