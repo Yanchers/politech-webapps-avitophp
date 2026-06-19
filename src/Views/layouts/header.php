@@ -24,6 +24,7 @@
                     <?php if (isset($user) && $user): ?>
                         <a href="/favorites" class="header__link">Избранное</a>
                         <a href="/cart" class="header__link">Корзина</a>
+                        <a href="/chat" class="header__link">Сообщения</a>
                         <a href="/profile" class="header__link">Профиль</a>
                         <?php if ($user['role_name'] === 'employee' || $user['role_name'] === 'admin'): ?>
                             <a href="/moderation" class="header__link">Модерация</a>

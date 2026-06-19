@@ -9,4 +9,5 @@ class ChatMessage
     public ?int $sender_id = null;
     public ?int $receiver_id = null;
     public ?string $message = null;
+    public ?string $created_at = null;
 }

@@ -63,6 +63,7 @@
                     <form action="/cart/add/<?= $ad->ad_id ?>" method="POST" style="display:inline">
                         <button type="submit" class="btn">В корзину</button>
                     </form>
+                    <a href="/chat/<?= $ad->ad_id ?>/<?= $seller->user_id ?>" class="btn">Написать продавцу</a>
                 <?php endif; ?>
             <?php endif; ?>
         </div>

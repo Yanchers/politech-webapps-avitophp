@@ -131,4 +131,9 @@ $router->post('/admin/ad_chat_messages/{id}/update', 'AdminController@adChatMess
 $router->get('/admin/ad_chat_messages/{id}/delete', 'AdminController@adChatMessagesDelete', ['auth', 'role:admin']);
 $router->post('/admin/ad_chat_messages/batch-delete', 'AdminController@adChatMessagesBatchDelete', ['auth', 'role:admin']);
 
+// --- Чат ---
+$router->get('/chat', 'ChatController@index', ['auth']);
+$router->get('/chat/{adId}/{userId}', 'ChatController@show', ['auth']);
+$router->post('/chat/{adId}/{userId}', 'ChatController@store', ['auth']);
+
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
