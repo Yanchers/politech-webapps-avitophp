@@ -11,8 +11,7 @@
                 <select name="category_id" class="filter-form__select">
                     <option value="">Все категории</option>
                     <?php foreach ($categories as $cat):
-                        $subRepo = new \App\Repositories\CategoryRepository();
-                        $subcategories = $subRepo->findByParentId($cat->category_id);
+                        $subcategories = $categorySubcategories[$cat->category_id] ?? [];
                     ?>
                         <optgroup label="<?= $this->escape($cat->name) ?>">
                             <?php if (!empty($subcategories)): ?>

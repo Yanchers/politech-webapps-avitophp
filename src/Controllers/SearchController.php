@@ -49,6 +49,10 @@ class SearchController extends Controller
         );
 
         $categories = $this->categoryRepo->findParents();
+        $categorySubcategories = [];
+        foreach ($categories as $cat) {
+            $categorySubcategories[$cat->category_id] = $this->categoryRepo->findByParentId($cat->category_id);
+        }
         $cities = $this->cityRepo->findAll('name');
         $conditions = $this->conditionRepo->findAll();
 
@@ -58,6 +62,7 @@ class SearchController extends Controller
             'title' => $search ? "Поиск: {$search}" : 'Поиск объявлений',
             'ads' => $ads,
             'categories' => $categories,
+            'categorySubcategories' => $categorySubcategories,
             'cities' => $cities,
             'conditions' => $conditions,
             'search' => $search,

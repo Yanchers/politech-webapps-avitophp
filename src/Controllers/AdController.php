@@ -63,12 +63,17 @@ class AdController extends Controller
     public function create(): void
     {
         $categories = $this->categoryRepo->findParents();
+        $categorySubcategories = [];
+        foreach ($categories as $cat) {
+            $categorySubcategories[$cat->category_id] = $this->categoryRepo->findByParentId($cat->category_id);
+        }
         $cities = $this->cityRepo->findAll('name');
         $conditions = $this->conditionRepo->findAll();
 
         $this->render('ad/create', [
             'title' => 'Создать объявление',
             'categories' => $categories,
+            'categorySubcategories' => $categorySubcategories,
             'cities' => $cities,
             'conditions' => $conditions,
         ]);
@@ -125,6 +130,10 @@ class AdController extends Controller
         }
 
         $categories = $this->categoryRepo->findParents();
+        $categorySubcategories = [];
+        foreach ($categories as $cat) {
+            $categorySubcategories[$cat->category_id] = $this->categoryRepo->findByParentId($cat->category_id);
+        }
         $cities = $this->cityRepo->findAll('name');
         $conditions = $this->conditionRepo->findAll();
         $images = $this->adRepo->getImages($id);
@@ -133,6 +142,7 @@ class AdController extends Controller
             'title' => 'Редактировать объявление',
             'ad' => $ad,
             'categories' => $categories,
+            'categorySubcategories' => $categorySubcategories,
             'cities' => $cities,
             'conditions' => $conditions,
             'images' => $images,
@@ -218,9 +228,16 @@ class AdController extends Controller
     {
         $ads = $this->adRepo->findBySellerId($this->session->getUserId());
 
+        $adImages = [];
+        foreach ($ads as $ad) {
+            $images = $this->adRepo->getImages($ad->ad_id);
+            $adImages[$ad->ad_id] = !empty($images) ? $images[0] : null;
+        }
+
         $this->render('ad/index', [
             'title' => 'Мои объявления',
             'ads' => $ads,
+            'adImages' => $adImages,
         ]);
     }
 

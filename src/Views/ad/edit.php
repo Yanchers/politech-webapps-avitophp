@@ -7,9 +7,11 @@
             <option value="">Выберите категорию</option>
             <?php foreach ($categories as $cat): ?>
                 <optgroup label="<?= $this->escape($cat->name) ?>">
+                    <option value="<?= $cat->category_id ?>" <?= (isset($_SESSION['old_input']['category_id']) && (int)$_SESSION['old_input']['category_id'] === $cat->category_id) ? 'selected' : '' ?>>
+                        - Все
+                    </option>
                     <?php
-                    $subRepo = new \App\Repositories\CategoryRepository();
-                    $subcategories = $subRepo->findByParentId($cat->category_id);
+                    $subcategories = $categorySubcategories[$cat->category_id] ?? [];
                     foreach ($subcategories as $sub):
                     ?>
                         <option value="<?= $sub->category_id ?>" <?= $ad->category_id === $sub->category_id ? 'selected' : '' ?>>

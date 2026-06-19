@@ -8,10 +8,10 @@
             <div class="ad-card">
                 <div class="ad-card__image">
                     <?php
-                    $firstImage = (new \App\Repositories\AdvertisementRepository())->getImages($ad->ad_id);
+                    $firstImage = $adImages[$ad->ad_id] ?? null;
                     if (!empty($firstImage)):
                     ?>
-                        <img src="/<?= $this->escape($firstImage[0]->image_path) ?>" alt="<?= $this->escape($ad->title) ?>">
+                        <img src="/<?= $this->escape($firstImage->image_path) ?>" alt="<?= $this->escape($ad->title) ?>">
                     <?php else: ?>
                         <div class="ad-card__no-image">Нет фото</div>
                     <?php endif; ?>
