@@ -7,6 +7,7 @@ use App\Core\Database;
 use App\Repositories\AdvertisementRepository;
 use App\Repositories\CartRepository;
 use App\Repositories\OrderRepository;
+use App\Services\MailService;
 
 class OrderController extends Controller
 {
@@ -149,31 +150,18 @@ class OrderController extends Controller
 
     private function sendOrderEmail(array $user, string $orderNumber, array $items): void
     {
-        $appName = $this->getLayoutData()['app']['name'] ?? 'Avito PHP';
         $to = $user['email'] ?? '';
         if (empty($to)) return;
 
-        $subject = "Заказ №{$orderNumber} оформлен — {$appName}";
+        $config = require __DIR__ . '/../../config/app.php';
+        $apiKey = $config['brevo_api_key'] ?? '';
 
-        $body = "<h1>Спасибо за покупку!</h1>";
-        $body .= "<p>Ваш заказ №<strong>{$orderNumber}</strong> успешно оформлен.</p>";
-        $body .= "<h2>Состав заказа:</h2>";
-        $body .= "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse:collapse;width:100%;'>";
-        $body .= "<tr><th>Товар</th><th>Цена</th></tr>";
+        if (empty($apiKey)) return;
 
-        $total = 0;
-        foreach ($items as $item) {
-            $body .= "<tr><td>" . htmlspecialchars($item['title']) . "</td><td>" . number_format($item['price'], 0, ',', ' ') . " ₽</td></tr>";
-            $total += $item['price'];
-        }
-        $body .= "<tr><td><strong>Итого</strong></td><td><strong>" . number_format($total, 0, ',', ' ') . " ₽</strong></td></tr>";
-        $body .= "</table>";
-        $body .= "<p>Связаться с продавцами можно через чат на сайте.</p>";
+        $name = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+        $senderEmail = 'oreshko2001@gmail.com';
 
-        $headers = "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/html; charset=utf-8\r\n";
-        $headers .= "From: no-reply@" . ($_SERVER['HTTP_HOST'] ?? 'avito-php.local') . "\r\n";
-
-        mail($to, $subject, $body, $headers);
+        $mailer = new MailService($apiKey, $senderEmail, $config['name'] ?? 'Jan');
+        $mailer->sendOrderConfirmation($to, $name, $orderNumber, $items);
     }
 }
