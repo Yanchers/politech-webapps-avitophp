@@ -69,7 +69,7 @@ class Validator
     private function ruleMin(string $field, mixed $value, array $params): void
     {
         $min = (int) ($params[0] ?? 0);
-        if (is_string($value) && mb_strlen($value) < $min) {
+        if (is_string($value) && strlen($value) < $min) {
             $this->addError($field, "Минимальная длина — {$min} символов");
         }
     }
@@ -77,7 +77,7 @@ class Validator
     private function ruleMax(string $field, mixed $value, array $params): void
     {
         $max = (int) ($params[0] ?? 0);
-        if (is_string($value) && mb_strlen($value) > $max) {
+        if (is_string($value) && strlen($value) > $max) {
             $this->addError($field, "Максимальная длина — {$max} символов");
         }
     }
