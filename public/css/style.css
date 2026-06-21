@@ -168,6 +168,12 @@ body {
     border: 1px solid #c3e6cb;
 }
 
+.alert--info {
+    background: #e8f4fd;
+    color: #2980b9;
+    border: 1px solid #b6d4fe;
+}
+
 /* Сетка */
 .grid {
     display: grid;

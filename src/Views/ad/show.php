@@ -46,7 +46,9 @@
         <div class="ad-detail__actions">
             <?php if (isset($user) && $user): ?>
                 <?php if ($user['user_id'] === $ad->seller_id): ?>
-                    <a href="/ad/<?= $ad->ad_id ?>/edit" class="btn">Редактировать</a>
+                    <?php if (in_array($ad->status_id, [1, 2, 3, 4])): ?>
+                        <a href="/ad/<?= $ad->ad_id ?>/edit" class="btn">Редактировать</a>
+                    <?php endif; ?>
                     <form action="/ad/<?= $ad->ad_id ?>/delete" method="POST" style="display:inline" onsubmit="return confirm('Удалить объявление?')">
                         <button type="submit" class="btn btn--danger">Удалить</button>
                     </form>

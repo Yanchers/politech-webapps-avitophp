@@ -29,7 +29,9 @@
                         <span><?= date('d.m.Y', strtotime($ad->created_at)) ?></span>
                     </div>
                     <div class="ad-card__actions">
-                        <a href="/ad/<?= $ad->ad_id ?>/edit" class="btn btn--small">Редактировать</a>
+                        <?php if (in_array($ad->status_id, [1, 2, 3, 4])): ?>
+                            <a href="/ad/<?= $ad->ad_id ?>/edit" class="btn btn--small">Редактировать</a>
+                        <?php endif; ?>
                         <form action="/ad/<?= $ad->ad_id ?>/delete" method="POST" style="display:inline" onsubmit="return confirm('Удалить объявление?')">
                             <button type="submit" class="btn btn--small btn--danger">Удалить</button>
                         </form>

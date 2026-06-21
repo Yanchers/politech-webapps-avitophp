@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Response;
 use App\Core\Validator;
+use App\Models\Advertisement;
 use App\Repositories\AdvertisementRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\CityRepository;
@@ -126,6 +127,12 @@ class AdController extends Controller
             return;
         }
 
+        if (!in_array($ad->status_id, Advertisement::EDITABLE_STATUSES)) {
+            $this->session->setFlash('error', 'Это объявление нельзя редактировать');
+            $this->redirect('/ad/' . $id);
+            return;
+        }
+
         $categories = $this->categoryRepo->findParents();
         $categorySubcategories = [];
         foreach ($categories as $cat) {
@@ -159,6 +166,12 @@ class AdController extends Controller
             return;
         }
 
+        if (!in_array($ad->status_id, Advertisement::EDITABLE_STATUSES)) {
+            $this->session->setFlash('error', 'Это объявление нельзя редактировать');
+            $this->redirect('/ad/' . $id);
+            return;
+        }
+
         $data = $this->request->only(['category_id', 'title', 'description', 'price', 'item_condition_id', 'city_id']);
 
         $validator = new Validator();
@@ -175,6 +188,8 @@ class AdController extends Controller
             return;
         }
 
+        $newStatusId = Advertisement::STATUS_MODERATION;
+
         $this->adRepo->update($id, [
             'category_id' => (int) $data['category_id'],
             'item_condition_id' => (int) $data['item_condition_id'],
@@ -183,7 +198,7 @@ class AdController extends Controller
             'description' => $data['description'],
             'price' => (float) $data['price'],
             'updated_at' => date('Y-m-d H:i:s'),
-            'status_id' => 2,
+            'status_id' => $newStatusId,
         ]);
 
         $deleteImages = $this->request->post('delete_images');
@@ -195,7 +210,10 @@ class AdController extends Controller
 
         $this->handleImageUpload($id);
 
-        $this->session->setFlash('success', 'Объявление обновлено');
+        $message = in_array($ad->status_id, Advertisement::STATUSES_REQUIRING_REMODERATION)
+            ? 'Объявление отправлено на повторную модерацию'
+            : 'Объявление обновлено';
+        $this->session->setFlash('success', $message);
         $this->redirect('/ad/' . $id);
     }
 

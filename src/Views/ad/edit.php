@@ -1,5 +1,15 @@
 <h1>Редактировать объявление</h1>
 
+<?php if (in_array($ad->status_id, [3, 4])): ?>
+    <div class="alert alert--info">
+        После редактирования объявление будет отправлено на повторную модерацию.
+    </div>
+<?php elseif ($ad->status_id === 1): ?>
+    <div class="alert alert--info">
+        После сохранения объявление будет отправлено на модерацию.
+    </div>
+<?php endif; ?>
+
 <form action="/ad/<?= $ad->ad_id ?>/edit" method="POST" enctype="multipart/form-data">
     <div class="form-group">
         <label for="category_id">Категория</label>
