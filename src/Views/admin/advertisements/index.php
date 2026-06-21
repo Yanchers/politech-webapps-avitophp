@@ -25,17 +25,17 @@
             <tbody>
                 <?php foreach ($items as $item): ?>
                     <tr>
-                        <td><input type="checkbox" name="ids[]" value="<?= $item['ad_id'] ?>" class="admin-check-item"></td>
-                        <td><?= $item['ad_id'] ?></td>
-                        <td><a href="/ad/<?= $item['ad_id'] ?>"><?= $this->escape($item['title']) ?></a></td>
-                        <td><?= $this->escape($item['seller_first_name'] . ' ' . $item['seller_last_name']) ?></td>
-                        <td><?= number_format($item['price'], 0, '', ' ') ?> ₽</td>
-                        <td><?= $this->escape($item['category_name']) ?></td>
-                        <td><?= $this->escape($item['city_name']) ?></td>
-                        <td><?= $this->escape($item['status_name']) ?></td>
+                        <td><input type="checkbox" name="ids[]" value="<?= $item->ad_id ?>" class="admin-check-item"></td>
+                        <td><?= $item->ad_id ?></td>
+                        <td><a href="/ad/<?= $item->ad_id ?>"><?= $this->escape($item->title) ?></a></td>
+                        <td><?= $this->escape($item->seller_first_name . ' ' . $item->seller_last_name) ?></td>
+                        <td><?= number_format($item->price, 0, '', ' ') ?> ₽</td>
+                        <td><?= $this->escape($item->category_name) ?></td>
+                        <td><?= $this->escape($item->city_name) ?></td>
+                        <td><?= $this->escape($item->status_name) ?></td>
                         <td class="admin-actions">
-                            <a href="/admin/advertisements/<?= $item['ad_id'] ?>/edit" class="btn btn--small">Ред.</a>
-                            <a href="/admin/advertisements/<?= $item['ad_id'] ?>/delete" class="btn btn--small btn--danger" onclick="return confirm('Удалить?')">Удалить</a>
+                            <a href="/admin/advertisements/<?= $item->ad_id ?>/edit" class="btn btn--small">Ред.</a>
+                            <a href="/admin/advertisements/<?= $item->ad_id ?>/delete" class="btn btn--small btn--danger" onclick="return confirm('Удалить?')">Удалить</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

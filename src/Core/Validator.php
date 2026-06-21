@@ -107,13 +107,14 @@ class Validator
         if (!$table) return;
 
         $db = \App\Core\Database::getInstance();
-        $sql = "SELECT COUNT(*) as cnt FROM {$table} WHERE {$column} = ?";
-        $bindings = [$value];
 
         if ($excludeId) {
             $pk = $params[3] ?? $table . '_id';
-            $sql .= " AND {$pk} != ?";
-            $bindings[] = $excludeId;
+            $sql = "SELECT COUNT(*) as cnt FROM {$table} WHERE {$column} = ? AND {$pk} != ?";
+            $bindings = [$value, $excludeId];
+        } else {
+            $sql = "SELECT COUNT(*) as cnt FROM {$table} WHERE {$column} = ?";
+            $bindings = [$value];
         }
 
         $result = $db->fetch($sql, $bindings);

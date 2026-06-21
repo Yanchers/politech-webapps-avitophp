@@ -76,10 +76,7 @@ class Session
         if ($this->user === null && $this->userId !== null) {
             $db = Database::getInstance();
             $this->user = $db->fetch(
-                "SELECT u.*, r.name AS role_name
-                 FROM users u
-                 JOIN roles r ON u.role_id = r.role_id
-                 WHERE u.user_id = ?",
+                "SELECT * FROM user_view WHERE user_id = ?",
                 [$this->userId]
             );
         }

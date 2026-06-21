@@ -17,15 +17,7 @@ class AdvertisementRepository
 
     public function findById(int $id): ?Advertisement
     {
-        $sql = "SELECT a.*, c.name AS category_name, ct.name AS city_name,
-                       ic.name AS condition_name, s.name AS status_name
-                FROM advertisements a
-                JOIN categories c ON a.category_id = c.category_id
-                JOIN cities ct ON a.city_id = ct.city_id
-                JOIN item_conditions ic ON a.item_condition_id = ic.item_condition_id
-                JOIN advertisement_statuses s ON a.status_id = s.ad_status_id
-                WHERE a.ad_id = ?";
-        $row = $this->db->fetch($sql, [$id]);
+        $row = $this->db->fetch("SELECT * FROM ad_view WHERE ad_id = ?", [$id]);
         return $row ? $this->hydrate($row) : null;
     }
 
@@ -41,57 +33,47 @@ class AdvertisementRepository
         int $offset = 0
     ): array
     {
-        $sql = "SELECT a.*, c.name AS category_name, ct.name AS city_name,
-                       ic.name AS condition_name, s.name AS status_name,
-                       ai.image_path as first_image_path
-                FROM advertisements a
-                LEFT JOIN advertisement_images ai ON a.ad_id = ai.ad_id AND ai.sort_order = 1
-                JOIN categories c ON a.category_id = c.category_id
-                JOIN cities ct ON a.city_id = ct.city_id
-                JOIN item_conditions ic ON a.item_condition_id = ic.item_condition_id
-                JOIN advertisement_statuses s ON a.status_id = s.ad_status_id
-                WHERE a.status_id = 3";
-
+        $sql = "SELECT * FROM ad_view WHERE status_id = 3";
         $params = [];
 
         if ($categoryId) {
-            $sql .= " AND (a.category_id = ? OR c.parent_id = ?)";
+            $sql .= " AND (category_id = ? OR category_id IN (SELECT category_id FROM categories WHERE parent_id = ?))";
             $params[] = $categoryId;
             $params[] = $categoryId;
         }
 
         if ($cityId) {
-            $sql .= " AND a.city_id = ?";
+            $sql .= " AND city_id = ?";
             $params[] = $cityId;
         }
 
         if ($itemConditionId) {
-            $sql .= " AND a.item_condition_id = ?";
+            $sql .= " AND item_condition_id = ?";
             $params[] = $itemConditionId;
         }
 
         if ($priceMin !== null && $priceMin != 0) {
-            $sql .= " AND a.price >= ?";
+            $sql .= " AND price >= ?";
             $params[] = $priceMin;
         }
 
         if ($priceMax !== null && $priceMax != 0) {
-            $sql .= " AND a.price <= ?";
+            $sql .= " AND price <= ?";
             $params[] = $priceMax;
         }
 
         if ($search) {
-            $sql .= " AND (a.title LIKE ? OR a.description LIKE ?)";
+            $sql .= " AND (title LIKE ? OR description LIKE ?)";
             $searchTerm = '%' . $search . '%';
             $params[] = $searchTerm;
             $params[] = $searchTerm;
         }
 
         $sort = match ($sort) {
-            'date_asc' => 'a.created_at ASC',
-            'price_asc' => 'a.price ASC',
-            'price_desc' => 'a.price DESC',
-            default => 'a.created_at DESC',
+            'date_asc' => 'created_at ASC',
+            'price_asc' => 'price ASC',
+            'price_desc' => 'price DESC',
+            default => 'created_at DESC',
         };
         $sql .= " ORDER BY {$sort} LIMIT ? OFFSET ?";
         $params[] = $limit;
@@ -102,47 +84,21 @@ class AdvertisementRepository
 
     public function findByStatus(int $statusId): array
     {
-        $sql = "SELECT a.*, c.name AS category_name, ct.name AS city_name,
-                       ic.name AS condition_name, s.name AS status_name,
-                       u.email AS seller_email, u.first_name AS seller_first_name, u.last_name AS seller_last_name
-                FROM advertisements a
-                JOIN categories c ON a.category_id = c.category_id
-                JOIN cities ct ON a.city_id = ct.city_id
-                JOIN item_conditions ic ON a.item_condition_id = ic.item_condition_id
-                JOIN advertisement_statuses s ON a.status_id = s.ad_status_id
-                JOIN users u ON a.seller_id = u.user_id
-                WHERE a.status_id = ?
-                ORDER BY a.created_at DESC";
+        $sql = "SELECT * FROM ad_view WHERE status_id = ? ORDER BY created_at DESC";
         return array_map(fn($row) => $this->hydrate($row), $this->db->fetchAll($sql, [$statusId]));
     }
 
     public function findBySellerId(int $sellerId): array
     {
-        $sql = "SELECT a.*, c.name AS category_name, ct.name AS city_name,
-                       ic.name AS condition_name, s.name AS status_name
-                FROM advertisements a
-                JOIN categories c ON a.category_id = c.category_id
-                JOIN cities ct ON a.city_id = ct.city_id
-                JOIN item_conditions ic ON a.item_condition_id = ic.item_condition_id
-                JOIN advertisement_statuses s ON a.status_id = s.ad_status_id
-                WHERE a.seller_id = ?
-                ORDER BY a.created_at DESC";
+        $sql = "SELECT * FROM ad_view WHERE seller_id = ? ORDER BY created_at DESC";
         return array_map(fn($row) => $this->hydrate($row), $this->db->fetchAll($sql, [$sellerId]));
     }
 
     public function findAllWithSellers(): array
     {
-        return $this->db->fetchAll(
-            "SELECT a.*, c.name AS category_name, ct.name AS city_name,
-                    ic.name AS condition_name, s.name AS status_name,
-                    u.email AS seller_email, u.first_name AS seller_first_name, u.last_name AS seller_last_name
-             FROM advertisements a
-             JOIN categories c ON a.category_id = c.category_id
-             JOIN cities ct ON a.city_id = ct.city_id
-             JOIN item_conditions ic ON a.item_condition_id = ic.item_condition_id
-             JOIN advertisement_statuses s ON a.status_id = s.ad_status_id
-             JOIN users u ON a.seller_id = u.user_id
-             ORDER BY a.created_at DESC"
+        return array_map(
+            fn($row) => $this->hydrate($row),
+            $this->db->fetchAll("SELECT * FROM ad_view ORDER BY created_at DESC")
         );
     }
 
@@ -158,7 +114,7 @@ class AdvertisementRepository
 
     public function count(): int
     {
-        $result = $this->db->fetch("SELECT COUNT(*) AS cnt FROM advertisements");
+        $result = $this->db->fetch("SELECT fn_ad_count() AS cnt");
         return (int) ($result['cnt'] ?? 0);
     }
 
@@ -171,37 +127,37 @@ class AdvertisementRepository
         ?float $priceMax = null
     ): int
     {
-        $sql = "SELECT COUNT(*) AS cnt FROM advertisements a WHERE a.status_id = 3";
+        $sql = "SELECT COUNT(*) AS cnt FROM ad_view WHERE status_id = 3";
         $params = [];
 
         if ($categoryId) {
-            $sql .= " AND (a.category_id = ? OR a.category_id IN (SELECT category_id FROM categories WHERE parent_id = ?))";
+            $sql .= " AND (category_id = ? OR category_id IN (SELECT category_id FROM categories WHERE parent_id = ?))";
             $params[] = $categoryId;
             $params[] = $categoryId;
         }
 
         if ($cityId) {
-            $sql .= " AND a.city_id = ?";
+            $sql .= " AND city_id = ?";
             $params[] = $cityId;
         }
 
         if ($itemConditionId) {
-            $sql .= " AND a.item_condition_id = ?";
+            $sql .= " AND item_condition_id = ?";
             $params[] = $itemConditionId;
         }
 
         if ($priceMin !== null && $priceMin != 0) {
-            $sql .= " AND a.price >= ?";
+            $sql .= " AND price >= ?";
             $params[] = $priceMin;
         }
 
         if ($priceMax !== null && $priceMax != 0) {
-            $sql .= " AND a.price <= ?";
+            $sql .= " AND price <= ?";
             $params[] = $priceMax;
         }
 
         if ($search) {
-            $sql .= " AND (a.title LIKE ? OR a.description LIKE ?)";
+            $sql .= " AND (title LIKE ? OR description LIKE ?)";
             $searchTerm = '%' . $search . '%';
             $params[] = $searchTerm;
             $params[] = $searchTerm;
@@ -270,7 +226,7 @@ class AdvertisementRepository
     public function getNextSortOrder(int $adId): int
     {
         $result = $this->db->fetch(
-            "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next FROM advertisement_images WHERE ad_id = ?",
+            "SELECT fn_next_image_sort_order(?) AS next",
             [$adId]
         );
         return (int) ($result['next'] ?? 1);

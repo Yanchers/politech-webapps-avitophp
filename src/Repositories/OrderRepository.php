@@ -50,42 +50,35 @@ class OrderRepository
 
     public function findItemsByOrderId(int $orderId): array
     {
-        $sql = "SELECT oi.*, a.title AS ad_title,
-                       u.first_name AS seller_first_name, u.last_name AS seller_last_name,
-                       u.email AS seller_email, u.phone AS seller_phone,
-                       ai.image_path AS first_image_path
-                FROM order_items oi
-                JOIN advertisements a ON oi.ad_id = a.ad_id
-                JOIN users u ON a.seller_id = u.user_id
-                LEFT JOIN advertisement_images ai ON a.ad_id = ai.ad_id AND ai.sort_order = 1
-                WHERE oi.order_id = ?
-                ORDER BY oi.order_item_id ASC";
-
+        $sql = "SELECT * FROM order_item_view WHERE order_id = ? ORDER BY order_item_id ASC";
         return array_map(fn($row) => $this->hydrateItem($row), $this->db->fetchAll($sql, [$orderId]));
     }
 
-    public function create(array $orderData, array $itemsData): Order
+    public function create(int $buyerId, float $totalAmount, array $itemsData): Order
     {
-        $orderId = $this->db->insert('orders', $orderData);
-        $order = $this->hydrate($this->db->fetch("SELECT * FROM orders WHERE order_id = ?", [$orderId]));
+        $itemsJson = json_encode(array_map(fn($item) => [
+            'ad_id' => (int)$item['ad_id'],
+            'price_paid' => (float)$item['price_paid'],
+        ], $itemsData));
 
-        foreach ($itemsData as $item) {
-            $item['order_id'] = $orderId;
-            $this->db->insert('order_items', $item);
-        }
+        $result = $this->db->fetch("CALL sp_checkout(?, ?, ?)", [
+            $buyerId,
+            $totalAmount,
+            $itemsJson,
+        ]);
 
+        $orderId = (int) $result['order_id'];
+        $order = $this->hydrate(
+            $this->db->fetch("SELECT * FROM orders WHERE order_id = ?", [$orderId])
+        );
         $order->items = $this->findItemsByOrderId($orderId);
         return $order;
     }
 
     public function generateOrderNumber(): string
     {
-        $number = 'ORD-' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 7));
-        $existing = $this->db->fetch("SELECT order_id FROM orders WHERE order_number = ?", [$number]);
-        if ($existing) {
-            return $this->generateOrderNumber();
-        }
-        return $number;
+        $result = $this->db->fetch("SELECT fn_generate_order_number() AS order_number");
+        return $result['order_number'];
     }
 
     private function hydrate(array $row): Order

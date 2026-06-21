@@ -20,7 +20,7 @@ class FavoriteAdvertisementRepository
                        ai.image_path AS first_image_path,
                        fa.added_at
                 FROM favorite_advertisements fa
-                JOIN advertisements a ON fa.ad_id = a.ad_id
+                JOIN ad_view a ON fa.ad_id = a.ad_id
                 LEFT JOIN advertisement_images ai ON a.ad_id = ai.ad_id AND ai.sort_order = 1
                 JOIN categories c ON a.category_id = c.category_id
                 JOIN cities ct ON a.city_id = ct.city_id
@@ -33,11 +33,11 @@ class FavoriteAdvertisementRepository
 
     public function exists(int $userId, int $adId): bool
     {
-        $row = $this->db->fetch(
-            "SELECT 1 FROM favorite_advertisements WHERE user_id = ? AND ad_id = ?",
+        $result = $this->db->fetch(
+            "SELECT fn_is_favorite(?, ?) AS res",
             [$userId, $adId]
         );
-        return $row !== null;
+        return (bool) ($result['res'] ?? false);
     }
 
     public function add(int $userId, int $adId): void

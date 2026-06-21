@@ -20,7 +20,7 @@ class CartRepository
                        ai.image_path AS first_image_path,
                        u.first_name AS seller_first_name, u.last_name AS seller_last_name
                 FROM user_basket ub
-                JOIN advertisements a ON ub.ad_id = a.ad_id
+                JOIN ad_view a ON ub.ad_id = a.ad_id
                 LEFT JOIN advertisement_images ai ON a.ad_id = ai.ad_id AND ai.sort_order = 1
                 JOIN categories c ON a.category_id = c.category_id
                 JOIN cities ct ON a.city_id = ct.city_id
@@ -37,7 +37,7 @@ class CartRepository
         $sql = "SELECT a.*, u.first_name AS seller_first_name, u.last_name AS seller_last_name,
                        ai.image_path AS first_image_path
                 FROM user_basket ub
-                JOIN advertisements a ON ub.ad_id = a.ad_id
+                JOIN ad_view a ON ub.ad_id = a.ad_id
                 LEFT JOIN advertisement_images ai ON a.ad_id = ai.ad_id AND ai.sort_order = 1
                 JOIN users u ON a.seller_id = u.user_id
                 WHERE ub.user_id = ? AND a.status_id = 3";
@@ -47,18 +47,18 @@ class CartRepository
     public function getActiveCartItems(int $userId): array
     {
         $sql = "SELECT a.* FROM user_basket ub
-                JOIN advertisements a ON ub.ad_id = a.ad_id
+                JOIN ad_view a ON ub.ad_id = a.ad_id
                 WHERE ub.user_id = ? AND a.status_id = 3";
         return $this->db->fetchAll($sql, [$userId]);
     }
 
     public function inBasket(int $userId, int $adId): bool
     {
-        $row = $this->db->fetch(
-            "SELECT 1 FROM user_basket WHERE user_id = ? AND ad_id = ?",
+        $result = $this->db->fetch(
+            "SELECT fn_is_in_basket(?, ?) AS res",
             [$userId, $adId]
         );
-        return $row !== null;
+        return (bool) ($result['res'] ?? false);
     }
 
     public function add(int $userId, int $adId): void

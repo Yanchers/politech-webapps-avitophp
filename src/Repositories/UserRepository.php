@@ -38,13 +38,7 @@ class UserRepository
 
     public function findAllWithRolesAndCities(): array
     {
-        return $this->db->fetchAll(
-            "SELECT u.*, r.name AS role_name, c.name AS city_name
-             FROM users u
-             JOIN roles r ON u.role_id = r.role_id
-             JOIN cities c ON u.city_id = c.city_id
-             ORDER BY u.user_id ASC"
-        );
+        return $this->db->fetchAll("SELECT * FROM user_view ORDER BY user_id ASC");
     }
 
     public function create(array $data): User

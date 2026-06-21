@@ -58,41 +58,24 @@ class OrderController extends Controller
             return;
         }
 
-        $orderNumber = $this->orderRepo->generateOrderNumber();
         $totalAmount = array_sum(array_column($items, 'price'));
 
-        $this->db->beginTransaction();
+        $itemsData = array_map(fn($item) => [
+            'ad_id' => $item['ad_id'],
+            'price_paid' => $item['price'],
+        ], $items);
 
         try {
-            $orderData = [
-                'order_number' => $orderNumber,
-                'buyer_id' => $userId,
-                'total_amount' => $totalAmount,
-            ];
-
-            $itemsData = [];
-            foreach ($items as $item) {
-                $itemsData[] = [
-                    'ad_id' => $item['ad_id'],
-                    'price_paid' => $item['price'],
-                ];
-
-                $this->adRepo->update($item['ad_id'], ['status_id' => 5]);
-            }
-
-            $this->orderRepo->create($orderData, $itemsData);
-            $this->basketRepo->clear($userId);
-            $this->db->commit();
+            $order = $this->orderRepo->create($userId, $totalAmount, $itemsData);
         } catch (\Exception $e) {
-            $this->db->rollback();
             $this->session->setFlash('error', 'Ошибка при оформлении заказа. Попробуйте снова.');
             $this->redirect('/cart');
             return;
         }
 
-        $this->sendOrderEmail($user, $orderNumber, $items);
+        $this->sendOrderEmail($user, $order->order_number, $items);
 
-        $this->session->set('last_order_number', $orderNumber);
+        $this->session->set('last_order_number', $order->order_number);
         $this->session->setFlash('success', 'Заказ успешно оформлен!');
         $this->redirect('/order/success');
     }

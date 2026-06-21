@@ -27,17 +27,7 @@ class ChatMessageRepository
 
     public function findAllWithDetails(): array
     {
-        return $this->db->fetchAll(
-            "SELECT m.*,
-                    s.email AS sender_email, s.first_name AS sender_first_name, s.last_name AS sender_last_name,
-                    r.email AS receiver_email, r.first_name AS receiver_first_name, r.last_name AS receiver_last_name,
-                    a.title AS ad_title
-             FROM ad_chat_messages m
-             JOIN users s ON m.sender_id = s.user_id
-             JOIN users r ON m.receiver_id = r.user_id
-             JOIN advertisements a ON m.ad_id = a.ad_id
-             ORDER BY m.ad_chat_message_id ASC"
-        );
+        return $this->db->fetchAll("SELECT * FROM chat_message_view ORDER BY ad_chat_message_id ASC");
     }
 
     public function create(array $data): ChatMessage
@@ -89,10 +79,8 @@ class ChatMessageRepository
                 JOIN advertisements a ON a.ad_id = m.ad_id
                 LEFT JOIN advertisement_images ai ON ai.ad_id = a.ad_id AND ai.sort_order = 1
                 WHERE m.ad_chat_message_id IN (
-                    SELECT MAX(ad_chat_message_id)
-                    FROM ad_chat_messages
-                    WHERE ? IN (sender_id, receiver_id)
-                    GROUP BY ad_id, LEAST(sender_id, receiver_id), GREATEST(sender_id, receiver_id)
+                    SELECT max_id FROM latest_chat_message_per_thread
+                    WHERE ? IN (user1, user2)
                 )
                 ORDER BY m.ad_chat_message_id DESC";
         return $this->db->fetchAll($sql, [$userId, $userId]);
