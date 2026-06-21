@@ -1089,6 +1089,35 @@ body {
     cursor: pointer;
 }
 
+/* ─── Графики админки ────────────────────────── */
+
+.admin-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+}
+
+.admin-chart-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.admin-chart-card__title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+.admin-chart-card canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 300px;
+}
+
 /* ─── Чат ──────────────────────────────────── */
 
 .chat-list__title {

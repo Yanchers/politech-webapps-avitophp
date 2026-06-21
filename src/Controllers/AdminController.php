@@ -18,18 +18,26 @@ class AdminController extends Controller
 
     public function dashboard(): void
     {
+        $adRepo = new AdvertisementRepository();
         $stats = [
             'users' => (new UserRepository())->count(),
-            'ads' => (new AdvertisementRepository())->count(),
+            'ads' => $adRepo->count(),
             'cities' => (new CityRepository())->count(),
             'categories' => (new CategoryRepository())->count(),
             'conditions' => (new ItemConditionRepository())->count(),
             'messages' => (new ChatMessageRepository())->count(),
         ];
 
+        $chartData = [
+            'byStatus' => $adRepo->countByStatus(),
+            'byCategory' => $adRepo->countByCategory(),
+            'byCity' => $adRepo->countByCity(),
+        ];
+
         $this->renderAdmin('admin/dashboard', [
             'title' => 'Админ-панель',
             'stats' => $stats,
+            'chartData' => $chartData,
         ]);
     }
 

@@ -118,6 +118,36 @@ class AdvertisementRepository
         return (int) ($result['cnt'] ?? 0);
     }
 
+    public function countByStatus(): array
+    {
+        $sql = "SELECT s.name, COUNT(a.ad_id) AS cnt
+                FROM advertisement_statuses s
+                LEFT JOIN advertisements a ON a.status_id = s.ad_status_id
+                GROUP BY s.ad_status_id, s.name
+                ORDER BY s.ad_status_id";
+        return $this->db->fetchAll($sql);
+    }
+
+    public function countByCategory(): array
+    {
+        $sql = "SELECT c.name, COUNT(a.ad_id) AS cnt
+                FROM categories c
+                LEFT JOIN advertisements a ON a.category_id = c.category_id
+                GROUP BY c.category_id, c.name
+                ORDER BY c.name";
+        return $this->db->fetchAll($sql);
+    }
+
+    public function countByCity(): array
+    {
+        $sql = "SELECT ct.name, COUNT(a.ad_id) AS cnt
+                FROM cities ct
+                LEFT JOIN advertisements a ON a.city_id = ct.city_id
+                GROUP BY ct.city_id, ct.name
+                ORDER BY ct.name";
+        return $this->db->fetchAll($sql);
+    }
+
     public function countActive(
         ?int $categoryId = null,
         ?int $cityId = null,
